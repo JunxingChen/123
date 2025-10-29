@@ -116,15 +116,17 @@ const storeContentStep = createStep({
     });
     
     try {
-      const existingCheck = await pool.query(
-        "SELECT id FROM scraped_content WHERE content_hash = $1",
-        [contentHash]
+      const insertResult = await pool.query(
+        `INSERT INTO scraped_content (url, title, content, content_hash, scraped_at)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (content_hash) DO NOTHING
+         RETURNING id`,
+        [url, title, content, contentHash, scrapedAt]
       );
       
-      if (existingCheck.rows.length > 0) {
+      if (insertResult.rows.length === 0) {
         logger?.info("ℹ️  [StoreContent] Content already exists (duplicate)", {
           contentHash,
-          existingId: existingCheck.rows[0].id,
         });
         
         return {
@@ -133,13 +135,6 @@ const storeContentStep = createStep({
           isNew: false,
         };
       }
-      
-      const insertResult = await pool.query(
-        `INSERT INTO scraped_content (url, title, content, content_hash, scraped_at)
-         VALUES ($1, $2, $3, $4, $5)
-         RETURNING id`,
-        [url, title, content, contentHash, scrapedAt]
-      );
       
       logger?.info("✅ [StoreContent] Successfully stored new content", {
         id: insertResult.rows[0].id,

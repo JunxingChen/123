@@ -3,6 +3,6 @@ dist
 .mastra
 .env.development
 .env
-*.db
+*.dbeeeeeee
 *.db-*
 .DS_Store

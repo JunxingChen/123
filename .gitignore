@@ -3,7 +3,7 @@ dist
 .mastra
 .env.development
 .env
-*.db
+*.db12121
 *.db-*
 .DS_Store
 
